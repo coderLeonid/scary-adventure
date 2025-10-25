@@ -20,7 +20,7 @@ DARK_GREEN = (0, 127, 0)
 MAIN_FOLDER_PATH = 'parts_of_shooter_game/Game'
 
 # Изображение на заднем фоне (обои игры)
-HORROR_GHOST_ICON = pg.image.load(f'{MAIN_FOLDER_PATH}/ghost_icon.ico')
+HORROR_GHOST_ICON = pg.image.load(f'{MAIN_FOLDER_PATH}/ghost.ico')
 
 # Размеры объектов на поле, самого поля и экрана (в пикселях, либо в рядах и колоннах)
 ROWS, COLUMNS = 15, 23
@@ -42,12 +42,12 @@ pg.display.set_icon(HORROR_GHOST_ICON)
 
 
 class KeyBoardImage:  # Класс который хранит изображения необходимых клавиш
-    __folder_path = 'parts_of_shooter_game/Keyboard'  # Папка, где хранятся изображения клавиш
+    __folder_path = 'parts_of_shooter_game/layout'  # Папка, где хранятся изображения клавиш
 
     @classmethod
     def set_class_attributes(cls):  # Функция, которая присваевает переменным (атрибутам) этого класса изображения клавиш
-        for attribute in ('wasd', 'arrows', 'enter', 'space'):
-            setattr(cls, attribute, pg.image.load(f'{cls.__folder_path}/{attribute}.png').convert())
+        for keyboard_image_name, attribute in zip(('WASD', 'Arrows', 'Enter', 'Space'), ('wasd', 'arrows', 'enter', 'space')):
+            setattr(cls, attribute, pg.image.load(f'{cls.__folder_path}/key{keyboard_image_name}.png').convert())
             getattr(cls, attribute).set_colorkey('yellow')
 
 
@@ -111,8 +111,8 @@ class MagicHelp(Obj):  # Класс, с помощью которого созд
     @classmethod
     def set_class_attributes(cls):
         # Получения изображений и звуковых эффектов магической помощи из папки
-        cls.image = pg.image.load(f'{cls.__folder_path}/image/{cls.__name__}.png').convert()
-        cls.sound_when_collected = pg.mixer.Sound(f'{cls.__folder_path}/sound_when_collected/{cls.__name__}.mp3')
+        cls.image = pg.image.load(f'{cls.__folder_path}/{cls.__name__}.png').convert()
+        cls.sound_when_collected = pg.mixer.Sound(f'{cls.__folder_path}/{cls.__name__}.mp3')
 
         # Список диапазонов цифр, которые должны быть сгенерированы для появления магической помощи каждого типа (ускорителя, целителя, боеприпасника)
         spawn_numbers = cls._spawn_numbers_on_level[Level.chosen] 
@@ -207,13 +207,13 @@ class Shot(Obj):  # Класс пуля (патрон, выстрел)
     # Создание изображений и звуков пуль, выпущенных человеком или осьминогом
     @classmethod
     def set_class_attributes(cls):
-        cls.image = pg.image.load(f'{cls.__folder_path}/image/{cls.__name__}.png')
+        cls.image = pg.image.load(f'{cls.__folder_path}/{cls.__name__}.png')
         if cls.__name__ == 'ElectricSphere':
             cls.image.set_colorkey('white')
         cls.radius = cls.image.get_rect()[2] // 2
 
-        cls.creation_sound = pg.mixer.Sound(f'{cls.__folder_path}/creation_sound/{cls.__name__}.mp3')
-        cls.destruction_sound = pg.mixer.Sound(f'{cls.__folder_path}/destruction_sound/{cls.__name__}.mp3')
+        cls.creation_sound = pg.mixer.Sound(f'{cls.__folder_path}/create_{cls.__name__}.mp3')
+        cls.destruction_sound = pg.mixer.Sound(f'{cls.__folder_path}/destroy_{cls.__name__}.mp3')
         return cls
 
 
@@ -439,7 +439,7 @@ class Monster(Creature):  # Класс, представляющий всех м
     @classmethod
     def create_image(cls):
         # Создание изображения монстра с определённым уровнем прозрачности (невидимости)
-        monster_image = pg.image.load(f'{cls.__folder_path}/image/{cls.__name__}.png').convert_alpha()
+        monster_image = pg.image.load(f'{cls.__folder_path}/{cls.__name__}.png').convert_alpha()
         if cls.__name__ == 'BloodyMary':
             monster_image.set_colorkey('white')
         monster_image.set_alpha(cls._image_transparency_on_level[Level.chosen])
@@ -474,7 +474,7 @@ class Monster(Creature):  # Класс, представляющий всех м
         cls.image = cls.create_image()
         cls.body_width, cls.body_height = cls.image.get_rect()[2:]
 
-        cls.bite_sound = pg.mixer.Sound(f'{cls.__folder_path}/bite_sound/{cls.__name__}.mp3')
+        cls.bite_sound = pg.mixer.Sound(f'{cls.__folder_path}/{cls.__name__}.mp3')
 
 
 # Виды монстров
@@ -689,8 +689,8 @@ class Octopus(Monster):  # Класс Осьминог
 
 
 LOAD_IMAGE = pg.image.load
-male_sprite_path = 'parts_of_shooter_game/boy_spritesheet/boy_'
-female_sprite_path = 'parts_of_shooter_game/girl_spritesheet/girl_'
+male_sprite_path = 'parts_of_shooter_game/spritesheet/boy'
+female_sprite_path = 'parts_of_shooter_game/spritesheet/girl'
 
 
 class SpriteSheet:  # Класс, представляющий анимацию
@@ -747,7 +747,7 @@ class SpriteSheet:  # Класс, представляющий анимацию
 
 class Chunk:  # Класс для группировки, чтобы можно было отрисовать несколько объектов сразу а не по отдельности, что в несколько раз ускоряет работу программы
     # Функция convert ускоряет отрисовку объектов на экране в несколько раз!
-    horror_background = pg.image.load(f'{MAIN_FOLDER_PATH}/horror_background.png').convert()
+    horror_background = pg.image.load(f'{MAIN_FOLDER_PATH}/background.png').convert()
 
     @classmethod
     def place_every_static_object_on_surface(cls):
@@ -805,7 +805,7 @@ class Chunk:  # Класс для группировки, чтобы можно 
 class GameFont:  # Класс дя создания текстовых наклеек в шрифте Arial
     @classmethod
     def render(cls, size: int, text: str, foreground: tuple[str, tuple], background=None, is_smoothy=False):
-        text_font = pg.font.Font('parts_of_shooter_game/horror_font/creepster.otf', size=size)
+        text_font = pg.font.Font('parts_of_shooter_game/layout/creepster.otf', size=size)
         if background is None:
             return text_font.render(text, is_smoothy, foreground)
         return text_font.render(text, is_smoothy, foreground, background)
@@ -818,12 +818,12 @@ class GameFont:  # Класс дя создания текстовых накл�
 
 class Block(Obj):  # Класс, представляющий неживые объекты игрового поля
     __slots__ = ()
-    __folder_path = 'parts_of_shooter_game/Block'
+    __folder_path = 'parts_of_shooter_game/layout'
 
     @classmethod
     def create_image(cls):
         # Создание изображений неживых объектов
-        image = pg.image.load(f'{cls.__folder_path}/image/{cls.__name__}.png').convert()
+        image = pg.image.load(f'{cls.__folder_path}/{cls.__name__}.png').convert()
         if cls.__name__ == 'Glass':
             image.set_colorkey('black')
         return image
@@ -1186,10 +1186,10 @@ class LevelChunk:  # Этот класс оптимизирует отображ
 
 def game_intro():
     # Музыка на основном меню
-    pg.mixer.music.load(f'{MAIN_FOLDER_PATH}/horror_intro_music.mp3')
+    pg.mixer.music.load(f'{MAIN_FOLDER_PATH}/intro.mp3')
     pg.mixer.music.play(-1)
     
-    level_button_click = pg.mixer.Sound(f'{MAIN_FOLDER_PATH}/level_button_click.mp3')  # Звук при нажатии на кнопки в главном меню игры
+    level_button_click = pg.mixer.Sound(f'{MAIN_FOLDER_PATH}/level_click.mp3')  # Звук при нажатии на кнопки в главном меню игры
     
     play_button = GameFont.render(size=60, text='Начать ночь!', foreground='brown', background=DARK_GRAY)
     level_info_keys = ('practice', 'easy', 'normal', 'hard', 'extreme', 'impossible', 'learn')
@@ -1250,7 +1250,7 @@ def game_intro():
 
 def shooter_game():
     # Музыка в игре
-    pg.mixer.music.load(f'{MAIN_FOLDER_PATH}/horror_game_music.mp3')
+    pg.mixer.music.load(f'{MAIN_FOLDER_PATH}/game.mp3')
     pg.mixer.music.play(-1)
 
     frames_passed_since_game_started = 0
@@ -1443,8 +1443,8 @@ def shooter_game():
 
 def game_help():  # Функция, которая научит играть в игру
     # Начальная музыка обучающего уровня
-    # pg.mixer.music.load(f'{MAIN_FOLDER_PATH}/peaceful_learn_music.mp3')
-    # pg.mixer.music.play(-1)
+    pg.mixer.music.load(f'{MAIN_FOLDER_PATH}/learn.mp3')
+    pg.mixer.music.play(-1)
 
     frames_passed_since_game_started = 0
 
@@ -1527,7 +1527,7 @@ def game_help():  # Функция, которая научит играть в 
                'Юноша и девушка должны играть в команде, если хотя бы один из вас погибает, проигрываете оба',
                'Вы выживете, если ни один из вас не погибнет раньше 6,1 часов утра')
 
-    lesson_index = 30  # Глава урока
+    lesson_index = 0  # Глава урока
     the_time_label_started_to_show_itself = time.time()
     watch_learning_label_duration = 9  # Длительность урока
 
@@ -1838,8 +1838,6 @@ def game_help():  # Функция, которая научит играть в 
 
 
 img = pg.image.load(f'{MAIN_FOLDER_PATH}/scary_adventure.png').convert_alpha()   # картинка "страшное приключение" в начале игры
-sound1 = pg.mixer.Sound('parts_of_shooter_game\Shot\creation_sound\ElectricSphere.mp3')  # звук выстрела осьминога
-sound2 = pg.mixer.Sound('parts_of_shooter_game\Shot\destruction_sound\ElectricSphere.mp3')  # звук разрушения пули осьминога
 
 
 def animate():
